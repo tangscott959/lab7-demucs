@@ -1,0 +1,59 @@
+# Local image. Build with worker/Makefile before applying.
+# Request is kept modest so a local node can schedule the pod.
+# Demucs still needs several GB at runtime; give Docker Desktop at least 8 GB.
+# Before GKE, push the image and switch imagePullPolicy off Never.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: demucs-model-cache
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demucs-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demucs-worker
+  template:
+    metadata:
+      labels:
+        app: demucs-worker
+    spec:
+      containers:
+      - name: worker
+        image: demucs-worker:v1
+        imagePullPolicy: Never
+        env:
+        - name: REDIS_HOST
+          value: "redis"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: MINIO_HOST
+          value: "minio:9000"
+        - name: MINIO_ACCESS_KEY
+          value: "rootuser"
+        - name: MINIO_SECRET_KEY
+          value: "rootpass123"
+        - name: CALLBACK_HOST
+          value: "rest-service:5000"
+        - name: TORCH_HOME
+          value: "/models"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: model-cache
+          mountPath: /models
+      volumes:
+      - name: model-cache
+        persistentVolumeClaim:
+          claimName: demucs-model-cache

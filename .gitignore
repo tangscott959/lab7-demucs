@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local secrets
+.env
+.env.*
+*.pem
+credentials.json
+
+# Local notes
+docs/
+
+# Editor and OS
+.cursor/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Downloaded audio and Demucs outputs.
+# Sample files already tracked under data/ stay in git.
+*.mp3
+*.wav
+separated/
+output/
+models/
+
+# Captured cluster output
+gke_*.txt
+*.log
